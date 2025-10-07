@@ -41,6 +41,8 @@ import AddClass from './classRelated/AddClass';
 import ClassDetails from './classRelated/ClassDetails';
 import ShowClasses from './classRelated/ShowClasses';
 import AccountMenu from '../../components/AccountMenu';
+import ShowFollowUps from './followupRelated/ShowFollowUps';
+import AddFollowUp from './followupRelated/AddFollowUp';
 
 const AdminDashboard = () => {
     const [open, setOpen] = useState(false);
@@ -133,6 +135,10 @@ const AdminDashboard = () => {
                         <Route path="/Admin/teachers/choosesubject/:id" element={<ChooseSubject situation="Norm" />} />
                         <Route path="/Admin/teachers/choosesubject/:classID/:teacherID" element={<ChooseSubject situation="Teacher" />} />
                         <Route path="/Admin/teachers/addteacher/:id" element={<AddTeacher />} />
+
+                        {/* Follow-Ups */}
+                        <Route path="/Admin/followups" element={<ShowFollowUps />} />
+                        <Route path="/Admin/followups/add" element={<AddFollowUp />} />
 
                         <Route path="/logout" element={<Logout />} />
                     </Routes>

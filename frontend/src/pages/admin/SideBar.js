@@ -11,6 +11,7 @@ import ClassOutlinedIcon from '@mui/icons-material/ClassOutlined';
 import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
 import ReportIcon from '@mui/icons-material/Report';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 
 const SideBar = () => {
     const location = useLocation();
@@ -58,6 +59,12 @@ const SideBar = () => {
                         <ReportIcon color={location.pathname.startsWith("/Admin/complains") ? 'primary' : 'inherit'} />
                     </ListItemIcon>
                     <ListItemText primary="Complains" />
+                </ListItemButton>
+                <ListItemButton component={Link} to="/Admin/followups">
+                    <ListItemIcon>
+                        <TrackChangesIcon color={location.pathname.startsWith("/Admin/followups") ? 'primary' : 'inherit'} />
+                    </ListItemIcon>
+                    <ListItemText primary="Follow-Ups" />
                 </ListItemButton>
             </React.Fragment>
             <Divider sx={{ my: 1 }} />
