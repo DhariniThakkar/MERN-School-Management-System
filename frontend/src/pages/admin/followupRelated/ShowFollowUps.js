@@ -2,11 +2,14 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllFollowups, assignFollowup, requestUpdateFromTeacher } from '../../../redux/followupRelated/followupHandle';
 import { Paper, Button, MenuItem, Select } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { processDueFollowups } from '../../../redux/followupRelated/followupHandle';
 import TableViewTemplate from '../../../components/TableViewTemplate';
 import { getAllTeachers } from '../../../redux/teacherRelated/teacherHandle';
 
 const ShowFollowUps = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { currentUser } = useSelector((state) => state.user);
   const { followupsList, loading, response } = useSelector((state) => state.followup);
@@ -88,7 +91,13 @@ const ShowFollowUps = () => {
         <div style={{ fontSize: '20px' }}>No Follow-Ups Right Now</div>
       ) : (
         <>
-          <h3 style={{ fontSize: '30px', marginBottom: '40px' }}>Follow-Ups</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <h3 style={{ fontSize: '30px', margin: 0 }}>Follow-Ups</h3>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Button variant="outlined" onClick={() => navigate('/Admin/addfollowup')}>Add Follow-Up</Button>
+              <Button variant="contained" color="secondary" onClick={() => dispatch(processDueFollowups()).then(() => dispatch(getAllFollowups(currentUser._id)))}>Run Due Check</Button>
+            </div>
+          </div>
           <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             {Array.isArray(followupsList) && followupsList.length > 0 && (
               <TableViewTemplate columns={followupColumns} rows={followupRows} />
