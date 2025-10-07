@@ -24,6 +24,8 @@ const {
     removeStudentAttendance } = require('../controllers/student_controller.js');
 const { subjectCreate, classSubjects, deleteSubjectsByClass, getSubjectDetail, deleteSubject, freeSubjectList, allSubjects, deleteSubjects } = require('../controllers/subject-controller.js');
 const { teacherRegister, teacherLogIn, getTeachers, getTeacherDetail, deleteTeachers, deleteTeachersByClass, deleteTeacher, updateTeacherSubject, teacherAttendance } = require('../controllers/teacher-controller.js');
+const { createFollowUp, listFollowUps, assignFollowUp, requestUpdateFromTeacher, addFollowUpUpdate, markFollowUpCompleted } = require('../controllers/followup-controller.js');
+const { processDueFollowUps } = require('../controllers/followup-cron.js');
 
 // Admin
 router.post('/AdminReg', adminRegister);
@@ -90,6 +92,16 @@ router.put("/Notice/:id", updateNotice)
 router.post('/ComplainCreate', complainCreate);
 
 router.get('/ComplainList/:id', complainList);
+
+// Follow-Up
+
+router.post('/FollowUpCreate', createFollowUp);
+router.get('/FollowUpList/:id', listFollowUps);
+router.put('/FollowUpAssign', assignFollowUp);
+router.put('/FollowUpRequestUpdate', requestUpdateFromTeacher);
+router.put('/FollowUpAddUpdate', addFollowUpUpdate);
+router.put('/FollowUpComplete', markFollowUpCompleted);
+router.post('/FollowUpProcessDue', processDueFollowUps);
 
 // Sclass
 
