@@ -27,6 +27,9 @@ import ViewStudent from './studentRelated/ViewStudent';
 import AddNotice from './noticeRelated/AddNotice';
 import ShowNotices from './noticeRelated/ShowNotices';
 
+import AddFollowUp from './followupRelated/AddFollowUp';
+import ShowFollowUps from './followupRelated/ShowFollowUps';
+
 import ShowSubjects from './subjectRelated/ShowSubjects';
 import SubjectForm from './subjectRelated/SubjectForm';
 import ViewSubject from './subjectRelated/ViewSubject';
@@ -103,6 +106,10 @@ const AdminDashboard = () => {
                         {/* Notice */}
                         <Route path="/Admin/addnotice" element={<AddNotice />} />
                         <Route path="/Admin/notices" element={<ShowNotices />} />
+
+                        {/* Follow-Up */}
+                        <Route path="/Admin/followups" element={<ShowFollowUps />} />
+                        <Route path="/Admin/addfollowup" element={<AddFollowUp />} />
 
                         {/* Subject */}
                         <Route path="/Admin/subjects" element={<ShowSubjects />} />

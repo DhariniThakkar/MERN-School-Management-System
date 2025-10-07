@@ -25,7 +25,7 @@ const {
 const { subjectCreate, classSubjects, deleteSubjectsByClass, getSubjectDetail, deleteSubject, freeSubjectList, allSubjects, deleteSubjects } = require('../controllers/subject-controller.js');
 const { teacherRegister, teacherLogIn, getTeachers, getTeacherDetail, deleteTeachers, deleteTeachersByClass, deleteTeacher, updateTeacherSubject, teacherAttendance } = require('../controllers/teacher-controller.js');
 const { createFollowUp, listFollowUps, assignFollowUp, requestUpdateFromTeacher, addFollowUpUpdate, markFollowUpCompleted } = require('../controllers/followup-controller.js');
-const { followUpCreate, followUpList, followUpUpdate, followUpAssign, followUpRequestUpdate, followUpTeacherUpdate } = require('../controllers/followup-controller.js');
+const { processDueFollowUps } = require('../controllers/followup-cron.js');
 
 // Admin
 router.post('/AdminReg', adminRegister);
@@ -95,12 +95,13 @@ router.get('/ComplainList/:id', complainList);
 
 // Follow-Up
 
-router.post('/FollowUpCreate', followUpCreate);
-router.get('/FollowUpList/:id', followUpList);
-router.put('/FollowUp/:id', followUpUpdate);
-router.put('/FollowUpAssign/:id', followUpAssign);
-router.put('/FollowUpRequest/:id', followUpRequestUpdate);
-router.put('/FollowUpTeacherUpdate/:id', followUpTeacherUpdate);
+router.post('/FollowUpCreate', createFollowUp);
+router.get('/FollowUpList/:id', listFollowUps);
+router.put('/FollowUpAssign', assignFollowUp);
+router.put('/FollowUpRequestUpdate', requestUpdateFromTeacher);
+router.put('/FollowUpAddUpdate', addFollowUpUpdate);
+router.put('/FollowUpComplete', markFollowUpCompleted);
+router.post('/FollowUpProcessDue', processDueFollowUps);
 
 // Sclass
 
@@ -126,13 +127,5 @@ router.get("/Subject/:id", getSubjectDetail)
 router.delete("/Subject/:id", deleteSubject)
 router.delete("/Subjects/:id", deleteSubjects)
 router.delete("/SubjectsClass/:id", deleteSubjectsByClass)
-
-// FollowUp
-router.post('/FollowUpCreate', createFollowUp);
-router.get('/FollowUpList/:id', listFollowUps);
-router.put('/FollowUpAssign', assignFollowUp);
-router.put('/FollowUpRequestUpdate', requestUpdateFromTeacher);
-router.put('/FollowUpAddUpdate', addFollowUpUpdate);
-router.put('/FollowUpComplete', markFollowUpCompleted);
 
 module.exports = router;

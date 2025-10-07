@@ -1,141 +1,99 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { assignFollowup, getAllFollowups, requestFollowupUpdate, updateFollowup } from '../../../redux/followupRelated/followupHandle';
-import { getAllTeachers } from '../../../redux/teacherRelated/teacherHandle';
-import { Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem } from '@mui/material';
+import { getAllFollowups, assignFollowup, requestUpdateFromTeacher } from '../../../redux/followupRelated/followupHandle';
+import { Paper, Button, MenuItem, Select } from '@mui/material';
 import TableViewTemplate from '../../../components/TableViewTemplate';
+import { getAllTeachers } from '../../../redux/teacherRelated/teacherHandle';
 
 const ShowFollowUps = () => {
   const dispatch = useDispatch();
-  const { currentUser } = useSelector(state => state.user);
-  const { followupsList, loading } = useSelector(state => state.followup);
-  const { teachersList } = useSelector(state => state.teacher);
 
-  const adminId = currentUser._id;
-
-  const [selected, setSelected] = useState(null);
-  const [assignTeacherId, setAssignTeacherId] = useState('');
-  const [requestOpen, setRequestOpen] = useState(false);
-  const [requestMessage, setRequestMessage] = useState('');
+  const { currentUser } = useSelector((state) => state.user);
+  const { followupsList, loading, response } = useSelector((state) => state.followup);
+  const { teachersList } = useSelector((state) => state.teacher);
 
   useEffect(() => {
-    dispatch(getAllFollowups(adminId));
-    dispatch(getAllTeachers(adminId));
-  }, [dispatch, adminId]);
+    dispatch(getAllFollowups(currentUser._id));
+    dispatch(getAllTeachers(currentUser._id));
+  }, [dispatch, currentUser._id]);
 
-  const columns = [
-    { id: 'studentName', label: 'Student Name', minWidth: 150 },
-    { id: 'parentName', label: 'Parents', minWidth: 150 },
+  const followupColumns = [
+    { id: 'studentName', label: 'Student', minWidth: 150 },
     { id: 'studentMobile', label: 'Mobile', minWidth: 120 },
-    { id: 'standard', label: 'Standard', minWidth: 80 },
-    { id: 'feedback', label: 'Feedback', minWidth: 90 },
-    { id: 'demo', label: 'Demo', minWidth: 170 },
-    { id: 'followUpDate', label: 'Follow-Up Date', minWidth: 120 },
-    { id: 'assignedTeacher', label: 'Assigned Teacher', minWidth: 140 },
-    { id: 'status', label: 'Status', minWidth: 100 },
-    { id: 'actions', label: 'Actions', minWidth: 280 },
+    { id: 'sclass', label: 'Class', minWidth: 100 },
+    { id: 'feedbackType', label: 'Feedback', minWidth: 100 },
+    { id: 'demo', label: 'Demo', minWidth: 180 },
+    { id: 'specificFollowUpDate', label: 'Follow-Up Date', minWidth: 140 },
+    { id: 'assignedTo', label: 'Assigned To', minWidth: 200 },
+    { id: 'actions', label: 'Actions', minWidth: 250 },
   ];
 
-  const rows = useMemo(() => (followupsList || []).map(f => {
-    const dateString = f.followUpDate ? new Date(f.followUpDate).toISOString().substring(0,10) : '';
-    const demoStr = f.demo?.booked ? `Yes - ${f.demo?.dateTime ? new Date(f.demo.dateTime).toLocaleString() : ''}` : `No - ${f.demo?.reason || ''}`;
+  const handleAssign = (followUpId, teacherId) => {
+    dispatch(assignFollowup(followUpId, teacherId)).then(() => {
+      dispatch(getAllFollowups(currentUser._id));
+    });
+  };
+
+  const handleRequestUpdate = (followUpId) => {
+    dispatch(requestUpdateFromTeacher(followUpId)).then(() => {
+      dispatch(getAllFollowups(currentUser._id));
+    });
+  };
+
+  const followupRows = (followupsList || []).map((fu) => {
+    const demoText = fu.demoBooked
+      ? (fu.demoDateTime ? new Date(fu.demoDateTime).toLocaleString() : 'Booked')
+      : (fu.demoReason || 'No');
+
+    const followDate = fu.specificFollowUpDate ? new Date(fu.specificFollowUpDate).toISOString().substring(0, 10) : '';
+
+    const teacherOptions = teachersList || [];
+
     return {
-      id: f._id,
-      studentName: f.studentName,
-      parentName: [f.motherName, f.fatherName].filter(Boolean).join(' / '),
-      studentMobile: f.studentMobile,
-      standard: f.standard,
-      feedback: f.feedback,
-      demo: demoStr,
-      followUpDate: dateString,
-      assignedTeacher: f.assignedTeacher?.name || 'Unassigned',
-      status: f.status,
+      studentName: fu.studentName,
+      studentMobile: fu.studentMobile,
+      sclass: fu.sclassName?.sclassName || '',
+      feedbackType: fu.feedbackType,
+      demo: demoText,
+      specificFollowUpDate: followDate,
+      assignedTo: (
+        <Select
+          size="small"
+          value={fu.assignedTo?._id || ''}
+          displayEmpty
+          onChange={(e) => handleAssign(fu._id, e.target.value)}
+        >
+          <MenuItem value=""><em>Unassigned</em></MenuItem>
+          {teacherOptions.map((t) => (
+            <MenuItem key={t._id} value={t._id}>{t.name}</MenuItem>
+          ))}
+        </Select>
+      ),
       actions: (
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Button size="small" variant="outlined" onClick={() => setSelected(f)}>Assign</Button>
-          <Button size="small" variant="outlined" onClick={() => { setRequestOpen(true); setSelected(f); }}>Request Update</Button>
-          <Button size="small" variant="outlined" onClick={() => dispatch(updateFollowup(f._id, { status: f.status === 'Closed' ? 'Open' : 'Closed' }))}>
-            {f.status === 'Closed' ? 'Reopen' : 'Close'}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button variant="outlined" onClick={() => handleRequestUpdate(fu._id)} disabled={fu.requestUpdate}>
+            Request Update
           </Button>
         </div>
-      )
+      ),
+      id: fu._id,
     };
-  }), [followupsList, dispatch]);
-
-  const handleAssign = async () => {
-    if (selected && assignTeacherId) {
-      await dispatch(assignFollowup(selected._id, assignTeacherId));
-      setSelected(null);
-      setAssignTeacherId('');
-      dispatch(getAllFollowups(adminId));
-    }
-  };
-
-  const handleRequest = async () => {
-    if (selected && requestMessage.trim()) {
-      await dispatch(requestFollowupUpdate(selected._id, adminId, requestMessage.trim()))
-      setRequestMessage('');
-      setRequestOpen(false);
-    }
-  };
+  });
 
   return (
     <div style={{ marginTop: '50px', marginRight: '20px' }}>
       {loading ? (
         <div style={{ fontSize: '20px' }}>Loading...</div>
+      ) : response ? (
+        <div style={{ fontSize: '20px' }}>No Follow-Ups Right Now</div>
       ) : (
         <>
           <h3 style={{ fontSize: '30px', marginBottom: '40px' }}>Follow-Ups</h3>
           <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             {Array.isArray(followupsList) && followupsList.length > 0 && (
-              <TableViewTemplate columns={columns} rows={rows} />
+              <TableViewTemplate columns={followupColumns} rows={followupRows} />
             )}
           </Paper>
-
-          <div style={{ marginTop: 16 }}>
-            <a className="link" href="/Admin/followups/add">Add New Follow-Up</a>
-          </div>
-
-          {/* Assign Dialog */}
-          <Dialog open={!!selected} onClose={() => setSelected(null)}>
-            <DialogTitle>Assign Follow-Up</DialogTitle>
-            <DialogContent>
-              <TextField
-                select
-                label="Teacher"
-                fullWidth
-                value={assignTeacherId}
-                onChange={(e) => setAssignTeacherId(e.target.value)}
-              >
-                {(teachersList || []).map(t => (
-                  <MenuItem key={t._id} value={t._id}>{t.name}</MenuItem>
-                ))}
-              </TextField>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setSelected(null)}>Cancel</Button>
-              <Button onClick={handleAssign} variant="contained">Assign</Button>
-            </DialogActions>
-          </Dialog>
-
-          {/* Request Update Dialog */}
-          <Dialog open={requestOpen} onClose={() => setRequestOpen(false)}>
-            <DialogTitle>Request Update from Teacher</DialogTitle>
-            <DialogContent>
-              <TextField
-                label="Message"
-                fullWidth
-                multiline
-                minRows={3}
-                value={requestMessage}
-                onChange={(e) => setRequestMessage(e.target.value)}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setRequestOpen(false)}>Cancel</Button>
-              <Button onClick={handleRequest} variant="contained">Send Request</Button>
-            </DialogActions>
-          </Dialog>
         </>
       )}
     </div>

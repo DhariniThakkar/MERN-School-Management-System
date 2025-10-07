@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   followupsList: [],
-  followupDetails: null,
   loading: false,
   error: null,
   response: null,
@@ -22,21 +21,6 @@ const followupSlice = createSlice({
       state.error = null;
       state.response = null;
     },
-    doneSuccess: (state, action) => {
-      state.followupDetails = action.payload;
-      state.loading = false;
-      state.error = null;
-      state.response = null;
-    },
-    postDone: (state) => {
-      state.loading = false;
-      state.error = null;
-      state.response = null;
-      state.status = 'added';
-    },
-    resetStatus: (state) => {
-      state.status = 'idle';
-    },
     getFailed: (state, action) => {
       state.response = action.payload;
       state.loading = false;
@@ -46,17 +30,27 @@ const followupSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-  },
+    postRequest: (state) => {
+      state.status = 'loading';
+    },
+    postSuccess: (state) => {
+      state.status = 'added';
+    },
+    postFailed: (state, action) => {
+      state.status = 'failed';
+      state.response = action.payload;
+    },
+    postError: (state, action) => {
+      state.status = 'error';
+      state.error = action.payload;
+    },
+    resetStatus: (state) => {
+      state.status = 'idle';
+      state.response = null;
+      state.error = null;
+    }
+  }
 });
 
-export const {
-  getRequest,
-  getSuccess,
-  doneSuccess,
-  getFailed,
-  getError,
-  postDone,
-  resetStatus,
-} = followupSlice.actions;
-
+export const { getRequest, getSuccess, getFailed, getError, postRequest, postSuccess, postFailed, postError, resetStatus } = followupSlice.actions;
 export const followupReducer = followupSlice.reducer;

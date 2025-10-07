@@ -1,17 +1,10 @@
 import axios from 'axios';
-import {
-  getRequest,
-  getSuccess,
-  getFailed,
-  getError,
-  postDone,
-  doneSuccess,
-} from './followupSlice';
+import { getRequest, getSuccess, getFailed, getError, postRequest, postSuccess, postFailed, postError } from './followupSlice';
 
-export const getAllFollowups = (adminId) => async (dispatch) => {
+export const getAllFollowups = (id) => async (dispatch) => {
   dispatch(getRequest());
   try {
-    const result = await axios.get(`${process.env.REACT_APP_BASE_URL}/FollowUpList/${adminId}`);
+    const result = await axios.get(`${process.env.REACT_APP_BASE_URL}/FollowUpList/${id}`);
     if (result.data.message) {
       dispatch(getFailed(result.data.message));
     } else {
@@ -23,65 +16,49 @@ export const getAllFollowups = (adminId) => async (dispatch) => {
 };
 
 export const createFollowup = (fields) => async (dispatch) => {
-  dispatch(getRequest());
+  dispatch(postRequest());
   try {
     const result = await axios.post(`${process.env.REACT_APP_BASE_URL}/FollowUpCreate`, fields, {
       headers: { 'Content-Type': 'application/json' },
     });
     if (result.data.message) {
-      dispatch(getFailed(result.data.message));
+      dispatch(postFailed(result.data.message));
     } else {
-      dispatch(postDone());
+      dispatch(postSuccess());
     }
   } catch (error) {
-    dispatch(getError(error));
+    dispatch(postError(error));
   }
 };
 
-export const updateFollowup = (id, fields) => async (dispatch) => {
-  dispatch(getRequest());
+export const assignFollowup = (followUpId, teacherId) => async (dispatch) => {
+  dispatch(postRequest());
   try {
-    const result = await axios.put(`${process.env.REACT_APP_BASE_URL}/FollowUp/${id}`, fields, {
+    const result = await axios.put(`${process.env.REACT_APP_BASE_URL}/FollowUpAssign`, { followUpId, teacherId }, {
       headers: { 'Content-Type': 'application/json' },
     });
     if (result.data.message) {
-      dispatch(getFailed(result.data.message));
+      dispatch(postFailed(result.data.message));
     } else {
-      dispatch(doneSuccess(result.data));
+      dispatch(postSuccess());
     }
   } catch (error) {
-    dispatch(getError(error));
+    dispatch(postError(error));
   }
 };
 
-export const assignFollowup = (id, teacherId) => async (dispatch) => {
-  dispatch(getRequest());
+export const requestUpdateFromTeacher = (followUpId) => async (dispatch) => {
+  dispatch(postRequest());
   try {
-    const result = await axios.put(`${process.env.REACT_APP_BASE_URL}/FollowUpAssign/${id}`, { teacherId }, {
+    const result = await axios.put(`${process.env.REACT_APP_BASE_URL}/FollowUpRequestUpdate`, { followUpId }, {
       headers: { 'Content-Type': 'application/json' },
     });
     if (result.data.message) {
-      dispatch(getFailed(result.data.message));
+      dispatch(postFailed(result.data.message));
     } else {
-      dispatch(doneSuccess(result.data));
+      dispatch(postSuccess());
     }
   } catch (error) {
-    dispatch(getError(error));
-  }
-};
-
-export const requestFollowupUpdate = (id, adminId, message) => async (dispatch) => {
-  dispatch(getRequest());
-  try {
-    const result = await axios.put(`${process.env.REACT_APP_BASE_URL}/FollowUpRequest/${id}`, { adminId, message }, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-    if (result.data.message) {
-      dispatch(getFailed(result.data.message));
-    } else {
-      dispatch(doneSuccess(result.data));
-    }
-  } catch (error) {
-    dispatch(getError(error));
+    dispatch(postError(error));
   }
 };
